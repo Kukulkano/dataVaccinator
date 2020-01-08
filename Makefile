@@ -3,8 +3,6 @@ base := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 all: makeinstaller
 
 VERSION?=0.1.7
-# WANT_GETREV=1
-# include $(RF_INCLUDES)/common.mk
 
 NAME=vaccinator
 PHPINC=$(RF_INCLUDES)php/src
