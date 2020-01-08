@@ -3,8 +3,8 @@ base := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 all: makeinstaller
 
 VERSION?=0.1.7
-WANT_GETREV=1
-include $(RF_INCLUDES)/common.mk
+# WANT_GETREV=1
+# include $(RF_INCLUDES)/common.mk
 
 NAME=vaccinator
 PHPINC=$(RF_INCLUDES)php/src
@@ -16,6 +16,12 @@ SOURCE_FOLDERS=$(base)/lib \
 	$(base)/www
  
 LIBDIR=$(base)/lib
+
+getrev:
+	$(eval REV := $(shell git describe --long `git log -1 --oneline -- $(base) | cut -d ' ' -f1` | sed ${RE} -e"s/rev-([0-9]+)-.*/\1/"))
+
+showrev: getrev
+	@echo $(REV)
 
 $(LIBDIR)/common.php: $(base)/dist/common.php $(PHPFILES)
 	cp $(base)/dist/common.php $@
