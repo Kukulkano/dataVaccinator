@@ -1,30 +1,33 @@
 base := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
+VERSION?=0.1.7
+NAME=vaccinator
+
 all: makeinstaller
 
-VERSION?=0.1.7
-
-NAME=vaccinator
-PHPINC=$(RF_INCLUDES)php/src
-
-PHPFILES=$(PHPINC)/incCommon.php \
-	$(PHPINC)/incDatabase.php
+$(eval _platform := $(shell uname))
+ifeq "Darwin" "$(_platform)"
+	RE=-E
+else
+	RE=-r
+endif
 
 SOURCE_FOLDERS=$(base)/lib \
 	$(base)/www
  
 LIBDIR=$(base)/lib
 
+# use this file to implement local things
+local_makefile.mk:
+	touch $@
+
+include local_makefile.mk
+
 getrev:
 	$(eval REV := $(shell git describe --long `git log -1 --oneline -- $(base) | cut -d ' ' -f1` | sed ${RE} -e"s/rev-([0-9]+)-.*/\1/"))
 
 showrev: getrev
 	@echo $(REV)
-
-$(LIBDIR)/common.php: $(base)/dist/common.php $(PHPFILES)
-	cp $(base)/dist/common.php $@
-	sed -f $(base)/dist/extract.sed $(PHPFILES) >> $@
-	echo "\n?>" >> $@
 
 common: $(LIBDIR)/common.php
 
@@ -38,7 +41,7 @@ package: clean makedirs common getrev
 	install -m 0755 $(base)/dist/install.sh $(PKG)/
 	install -m 0644 $(base)/dist/init.php $(PKG)/
 
-makeinstaller: package $(LIBDIR)/common.php
+makeinstaller: package
 	makeself $(NAME)-$(VERSION) $(NAME)-$(VERSION)-$(REV).sh \
 		"$(NAME) $(VERSION)-$(REV)" ./install.sh
 
