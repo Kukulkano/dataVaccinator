@@ -1,5 +1,5 @@
 author: Various authors <v.schmid@inspirant.de>
-meta-json: {"author":["Various authors <v.schmid@inspirant.de>"],"title":"vaccinator protocol"}
+
 title: vaccinator protocol
 
 Content
