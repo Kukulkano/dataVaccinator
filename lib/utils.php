@@ -43,7 +43,7 @@ function GeneratePID() {
 
     // try to get unique PID max 3 times
     for ($i = 1; $i <= 3; $i++) {
-        if (!function_exists('random_bytes')) {
+        if (function_exists('random_bytes')) {
             // php 7 or newer
             $pid = bin2hex(random_bytes(16));
         } else {
