@@ -7,7 +7,7 @@ if [ $UID -ne 0 ]; then
   exit 1
 fi
 
-NAME=vaccin
+NAME=vaccine
 DEST=/opt/${NAME}
 CONF=init.php
 LIB=lib
