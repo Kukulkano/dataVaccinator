@@ -229,7 +229,8 @@ function _validateParams(array $request, array $needed) {
     }
 
     // validate encrypted data if needed
-    // must be receipt:iv:data, where iv must be hex encoded
+    // must be receipt:cs:iv:payload, where iv must be hex encoded and cs
+    // must be 2 characters
     // maximum length of all is 15MB
     if (in_array("data", $needed)) {
         if (strlen($request["data"]) > MAX_DATA_SIZE * 1024) {
@@ -260,13 +261,14 @@ function _validateParams(array $request, array $needed) {
         }
         if (strlen($data[3]) < 4) {
             _generateError($request, EC_INVALID_ENCODING, 
-              "Invalid data encoding (expecting some payload)");
+              "Invalid data encoding (expecting some payload > 4 characters)");
             return false;
         }
     }
 
     // validate pkey value if needed 
     // (only for future ECC implementation)
+    /*
     if (in_array("pkey", $needed)) {
         $pkey = $request["pkey"];
         if (!array_key_exists($pkey, $KeyPublic)) {
@@ -280,6 +282,7 @@ function _validateParams(array $request, array $needed) {
             return false;
         }
     }
+    */
 
     // validate pid value(s) if needed
     if (in_array("pid", $needed)) {
