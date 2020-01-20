@@ -1,6 +1,6 @@
 author: Various authors <v.schmid@inspirant.de>
 
-title: vaccinator protocol
+title: Vaccinator Protocol
 
 Content
 =======
