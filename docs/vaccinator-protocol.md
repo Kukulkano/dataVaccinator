@@ -70,7 +70,7 @@ like this:
 
 It typically looks like in this example:
 
-    chacha20:f7:29a1c8b68d8a:Z2Zkc2dmZG1rZyBmZ(...)XI0N2Z2IDZyNHkzMmY0Mw==
+    aes-256-cbc:f7:29a1c8b68d8a:Z2Zkc2dmZG1rZyBmZ(...)XI0N2Z2IDZyNHkzMmY0Mw==
 
 This encryption is done automatically by the client API and happens
 transparently for the end users and service provider developers.
@@ -83,14 +83,10 @@ maybe a newer app-id. This is useful if, for example, the changeAppId()
 function failed during processing (please refer to changeAppId()
 function description in API description).
 
-**NOTE:** The above chosen ChaCha20/12 cipher is just the reference
-implementation. You can also use AES 256 (cbc-aes-256) or other
-encryption algorithms. The only thing to respect is the encoding using
-hex for the `cs` and the `iv/nonce`.
+**NOTE:** The above chosen AES cipher is just the reference
+implementation. You can also use others (like Twofish). The only thing to
+respect is the encoding using hex for the `cs` and the `iv/nonce`.
 
-**References:**
-
-<https://en.wikipedia.org/wiki/Salsa20#ChaCha20_adoption>
 
 Transport encryption
 --------------------
@@ -102,7 +98,7 @@ encrypted information is transported in the `data` field of the POST
 calls.
 
 The `data` field is encrypted using the SHA256 from the end users app-id
-as password. We will start implementing ChaCha20 encryption with
+as password. We will start implementing AES encryption with CBC mode and
 individual IV. See above chapter about implementation details.
 
 Error codes
@@ -394,7 +390,7 @@ complete example answer:
       "data": {
         "f315db7b01721026308a5346ce3cb513": {
           "status": "OK",
-          "data": "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6"
+          "data": "aes-256-cbc:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6"
         },
         "2ff18992cfc290d3d648aea5bdea38b1": {
           "status": "NOTFOUND",
