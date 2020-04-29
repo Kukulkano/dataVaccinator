@@ -27,7 +27,7 @@ if [ -d ${DEST} ]; then
 fi
 
 mkdir -p ${DEST}/
-cp -fr lib www ${DEST}/
+cp -fr lib www plugins ${DEST}/
 if [ ! -f ${DEST}/${LIB}/${CONF} ]; then
   cp ${CONF} ${DEST}/${LIB}/${CONF}
 fi

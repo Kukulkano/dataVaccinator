@@ -13,7 +13,8 @@ else
 endif
 
 SOURCE_FOLDERS=$(base)/lib \
-	$(base)/www
+	$(base)/www \
+	$(base)/plugins
  
 LIBDIR=$(base)/lib
 

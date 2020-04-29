@@ -20,9 +20,9 @@ option that prevents such drawbacks and avoids plain text information at all.
 
 Another alternative is SSE (Searchable Symmetric Encryption). This concept was
 target for several dissertations and scientific research and mainly focusses on
-searching in whole documents (fullo text search) and also represents cases for
-multi-user environments. So the results of the research was not applicable for
-the DataVaccinator.
+searching in whole documents (full-text search) and also represents cases for
+multi-user environments. So these concepts were not applicable for the
+DataVaccinator.
 
 The new DataVaccinator SearchHash algorithm offers a limited search by using
 the local app-id (key) together with hashing functions. Sadly, 
