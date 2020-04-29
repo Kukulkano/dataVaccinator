@@ -1,7 +1,7 @@
 <?php
 
-if (file_exists(__DIR__ . '/version.php')) {
-    include_once(__DIR__ . '/version.php');
+if (file_exists(ROOT_DIR . '/lib/version.php')) {
+    include_once(ROOT_DIR . '/lib/version.php');
 }
 if (!defined('VACCINATOR_VERSION')) {
     define('VACCINATOR_VERSION', 'dev');
@@ -20,7 +20,10 @@ define('EC_INVALID_ENCODING', 6); # expected json, hex or b64, but it is not
 define('EC_NOT_FOUND', 7); # if vaccinator internal error occured (a bad thing)
 define('EC_INVALID_PARTNER', 8); # not the correct partner
 define('EC_INVALID_SIZE', 9); # some parameter size invalid (> or <)
+define('EC_PLUGIN_INVALID', 20); # invalid call, returned by plugin
+define('EC_PLUGIN_MISSING_PARAMETERS', 21); # Missing parameters, returned by plugin
 define('EC_INTERNAL_ERROR', 99); # if vaccinator internal error ocured (a bad thing)
+
 
 define('LOG_TYPE_ADD', 0);
 define('LOG_TYPE_GET', 1);

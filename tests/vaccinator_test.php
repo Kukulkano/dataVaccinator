@@ -21,8 +21,37 @@ $r = array();
 $r["sid"] = $serviceProviderID;
 $r["spwd"] = $serviceProviderPwd;
 $remove = array(); // will have a list of PIDs to remove at the end
+$supportsSearch = false; // default
+$pass = "- pass\n";
+$someKey = "OAm6_Q%Xk*08";
 
 while (true) {
+    /**
+     * *******************************************
+     * Get version and check availability
+     * *******************************************
+     */
+    print("\nGet version and check availability:\n");
+    
+    $r["op"] = "check";
+    $j = _parseVaccinatorResult(json_encode($r));
+    if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
+    if ($j["status"] != "OK") {
+        print "Expected status OK for op 'check', got [".$j["status"]."] instead.\n";
+        break;
+    }
+    $p = getFromHash($j, "plugins", array());
+    foreach ($p as $plugin) {
+      if ($plugin['name'] == "search") {
+          $supportsSearch = true;
+          break;
+      }
+    }
+    print($pass);
+    if ($supportsSearch) {
+        print("\nNOTE: Server supports 'search' module. We will test this, too.\n");
+    }
+    
     /**
      * *******************************************
      * Tests that should fail (eg authentication)
@@ -37,7 +66,7 @@ while (true) {
         print "Expected status INVALID for missing json param, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     // invalid op params
     $r["op"] = "addr";
@@ -47,7 +76,7 @@ while (true) {
         print "Expected status INVALID for invalid op, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     // invalid login params
     $r["op"] = "add";
@@ -59,7 +88,7 @@ while (true) {
         print "Expected status INVALID for invalid sid, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd . "invalid";
@@ -71,7 +100,7 @@ while (true) {
         break;
     }
     // missing some data
-    print("pass\n");
+    print($pass);
 
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd;
@@ -82,10 +111,10 @@ while (true) {
         print "Expected status INVALID for missing data field, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     // Invalid hex encoding for IV in data
-    print("pass\n");
+    print($pass);
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd;
     $r["data"] = "cbc-aes-256:7f:75os3i1!#1tkuunp1fjoauw:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
@@ -95,7 +124,7 @@ while (true) {
         print "Expected status INVALID for wrong hex encoding, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     /**
      * *******************************************
@@ -109,6 +138,10 @@ while (true) {
     $r["op"] = "add";
     $r["data"] = "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
     $r["uid"] = 12345;
+    if ($supportsSearch) {
+      $r["words"] = array(_generateSearchHash("Klaus", true), 
+                          _generateSearchHash("Müller", true));
+    }
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "OK") {
@@ -121,7 +154,7 @@ while (true) {
         print "Expected some valid pid as result from 'add', got [$pid] instead.\n";
         break;
     }
-    print "New user PID: $pid\n";
+    print "NOTE: New user PID: $pid\n";
     array_push($remove, $pid); // for later deletion
 
     // did I get the uid value back?
@@ -130,7 +163,7 @@ while (true) {
         print "Expected returning the same uid as sent (12345), got [$uid] instead (add).\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     /**
      * *******************************************
@@ -145,25 +178,30 @@ while (true) {
     $r["data"] = "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
     $r["uid"] = 12345;
     $r["pid"] = $pid; // update generated entry
+    if ($supportsSearch) {
+      $r["words"] = array(_generateSearchHash("Klaus", true), 
+                          _generateSearchHash("Meier", true));
+    }
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "OK") {
         print "Expected status OK for 'update' operation, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     // with unknown PID
     $r["data"] = "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
     $r["uid"] = 12345;
     $r["pid"] = "2ff18992cfc290d3d648aea5bdea38b1"; // some unknown PID
+    unset($r["words"]);
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "INVALID") {
         print "Expected status INVALID for unknown 'update' pid, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     // with invalid PID (no hex)
     $r["data"] = "cbc-aes-256:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
@@ -175,7 +213,7 @@ while (true) {
         print "Expected status INVALID for invalid 'update' pid, got [".$j["status"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     /**
      * *******************************************
@@ -201,7 +239,7 @@ while (true) {
         print "Expected other payload, got [".$j["data"]."] instead.\n";
         break;
     }
-    print("pass\n");
+    print($pass);
 
     // retrieve generated pid and inknown pid
     $r["pid"] = $pid . " 2ff18992cfc290d3d648aea5bdea38b1";
@@ -216,7 +254,28 @@ while (true) {
         print "Expected status OK for valid PID and NOTFOUND for invalid. Got others.\n";
         break; 
     }
-    print("pass\n");
+    print($pass);
+    
+    // retrieve some PID using the search function on modified value "Meier"
+    if ($supportsSearch) {
+      print("\nTesting 'search' plugin function:\n");
+      $r["op"] = "search";
+      $r["words"] = _generateSearchHash("Meier", false);
+      unset($r["pid"]);
+      unset($r["data"]);
+      
+      $j = _parseVaccinatorResult(json_encode($r));
+      if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
+      if ($j["status"] != "OK") {
+          print "Expected status OK for 'search' operation, got [".$j["status"]."] instead.\n";
+          break;
+      }
+      if (getFromHash($j["pids"], 0) != $pid) {
+          print "Expected pid {$pid} as search result but got ".print_r($j["pids"], true)."instead.\n";
+          break;
+      }
+      print($pass);
+    }
 
     break; // leave endless while () loop
 }
@@ -250,6 +309,12 @@ print "\nDone\n";
  * *******************************************
  */
 
+/**
+ * Call DataVaccinator and decode result.
+ * 
+ * @param string $json
+ * @return array
+ */
 function _parseVaccinatorResult($json) {
     global $url;
     $data = array();
@@ -264,4 +329,23 @@ function _parseVaccinatorResult($json) {
     return $j;
 }
 
+function _generateSearchHash($word, $withRandom = false) {
+    global $someKey;
+    $searchHash = "";
+    $h = "cbb10913b2445cc225b4fb81580a6d02e6ae3d42"; // init, see docs
+    $letters = str_split($word);
+    foreach($letters as $l) {
+        $c = strtolower($l);
+        $h = sha1($c . $h . $someKey);
+        $searchHash .= substr($h, 0, 2); // concat SearchHash
+    }
+    if ($withRandom) {
+        $c = rand(0, 5);
+        for ($i = 1; $i <= $c; $i++) {
+            $v = rand(0, 255);
+            $searchHash .= str_pad(dechex($v), 2, "0");
+        }
+    }
+    return $searchHash;
+}
 ?>

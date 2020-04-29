@@ -1,6 +1,9 @@
 <?php
 require_once('../lib/init.php'); // include functions 
 
+$providerId = 0; // init, is set in _validateParams() later
+$clientAnswer = array(); // init, is set by _generateError() and _generateResult()
+
 $jsonString = getFromHash($_REQUEST, "json");
 if ($jsonString == "") {
     _generateError(array(), EC_MISSING_PARAMETERS, 
@@ -9,36 +12,69 @@ if ($jsonString == "") {
 }
 
 $request = json_decode($jsonString, true);
-
-$providerId = 0; // init, is set in _validateParams() later
-
-$op = getFromHash($request, "op");
-switch ($op) {
-    case "add":
-        _add($request);
-        break;
-    case "update":
-        _update($request);
-        break;
-    case "get":
-        _get($request);
-        break;
-    case "delete":
-        _delete($request);
-        break;
-    case "check":
-        _generateResult($request, array());
-        break;
-    default:
-        _generateError($request, EC_MISSING_PARAMETERS, 
-                       "Invalid operation");
-        exit();
+if ($request === NULL) {
+    _generateError(array(), EC_INVALID_ENCODING, 
+                   "Invalid JSON.", false);
+    exit();
 }
+
+if (!_manageHook('pre_globalProtocol', $request)) {
+
+    $op = getFromHash($request, "op");
+    switch ($op) {
+        case "add":
+            if (!_manageHook('pre_add', $request)) {
+                _add($request);
+            }
+            _manageHook('post_add', $request);
+            break;
+        case "update":
+            if (!_manageHook('pre_update', $request)) {
+                _update($request);
+            }
+            _manageHook('post_update', $request);
+            break;
+        case "get":
+            if (!_manageHook('pre_get', $request)) {
+                _get($request);
+            }
+            _manageHook('post_get', $request);
+            break;
+        case "delete":
+            if (!_manageHook('pre_delete', $request)) {
+                _delete($request);
+            }
+            _manageHook('post_delete', $request);
+            break;
+        case "check":
+            if (!_manageHook('pre_check', $request)) {
+                _check($request);
+            }
+            _manageHook('post_check', $request);
+            break;
+        default:
+            if (_manageHook('operation', $request)) {
+                // in plugins, return 'skip' = true in case of success top prevent
+                // any error message here.
+                break;
+            }
+            _generateError($request, EC_MISSING_PARAMETERS, 
+                           "Invalid operation");
+            break;
+    }
+}
+
+_manageHook('post_globalProtocol', $request);
+
+// returned prepared answers to client
+echo json_encode($clientAnswer)."\n";
+
+exit();
 
 /**
  * Handle ADD functionality
  * 
- * @param type $request json array
+ * @param array $request json array
  * @return void
  */
 function _add(array $request) {
@@ -74,7 +110,7 @@ function _add(array $request) {
 /**
  * Handle DELETE functionality
  * 
- * @param type $request json array
+ * @param array $request json array
  * @return void
  */
 function _delete(array $request) {
@@ -91,10 +127,10 @@ function _delete(array $request) {
     }
 
     $pids = str_repeat("?, ", count($pid) - 1) . "?";
-    $sqlPid = array_merge($pid, array($request["sid"])); // last ? is sid
+    array_push($pid, $request["sid"]); // value for last ? is sid
 
     $sql = "DELETE FROM data WHERE PID IN($pids) AND PROVIDERID=?";
-    $ret = ExecuteSQL($sql, $sqlPid);
+    $ret = ExecuteSQL($sql, $pid);
     if ($ret == false) {
         // failure!
         _generateError($request, EC_INTERNAL_ERROR, 
@@ -110,7 +146,7 @@ function _delete(array $request) {
 /**
  * Handle UPDATE functionality
  * 
- * @param type $request json array
+ * @param array $request json array
  * @return void
  */
 function _update(array $request) {
@@ -148,7 +184,7 @@ function _update(array $request) {
 /**
  * Handle GET functionality
  * 
- * @param type $request json array
+ * @param array $request json array
  * @return void
  */
 function _get(array $request) {
@@ -196,6 +232,18 @@ function _get(array $request) {
     DoLog(LOG_TYPE_GET, $request["sid"], implode(" ", $pid));
 
     $j = array("data" => $payload);
+    _generateResult($request, $j);
+}
+
+/**
+ * Handle the CHECK functionality
+ * 
+ * @param array $request
+ */
+function _check(array $request) {
+    global $plugins;
+    $j = array("time" => date("Y-m-d H:i:s"),
+               "plugins" => $plugins);
     _generateResult($request, $j);
 }
 
@@ -322,6 +370,7 @@ function _validateParams(array $request, array $needed) {
  * @return void
  */
 function _generateResult(array $request, array $j) {
+    global $clientAnswer;
     if (array_key_exists("uid", $request)) {
         // return any uid if given
         $j["uid"] = $request["uid"];
@@ -329,7 +378,8 @@ function _generateResult(array $request, array $j) {
     $ret = array("status" => "OK",
                  "version" => VACCINATOR_VERSION);
     $ret = array_merge($ret, $j);
-    echo json_encode($ret)."\n";
+    
+    $clientAnswer = $ret; // keep for later plugin processing and sending to client
 }
 
 /**
@@ -337,8 +387,8 @@ function _generateResult(array $request, array $j) {
  * 
  * @param array $request
  * @param type $errorCode EC_
- * @param type $desc
- * @param type $toLog
+ * @param string $desc
+ * @param boolean $toLog
  * @return void
  */
 function _generateError(array $request, $errorCode, $desc = "", $toLog = true) {
@@ -357,5 +407,28 @@ function _generateError(array $request, $errorCode, $desc = "", $toLog = true) {
         $provId = getFromHash($request, "sid");
         DoLog(LOG_TYPE_ERROR, $provId, "Returned error $errorCode [$desc]");
     }
+    
+    exit();
+}
+
+/**
+ * Manage plugin hook functionality.
+ * Returns true if the original function should get skipped (only used for "pre_").
+ * 
+ * @param string $hookName
+ * @param type $request
+ * @return boolean skip original function
+ */
+function _manageHook($hookName, &$request) {
+  $r = hook($hookName, $request);
+  if ($r === false) {
+    return false; // hook not in use
+  }
+  $e = getFromHash($r, "error", EC_OK);
+  if ($e != EC_OK) {
+    _generateError($request, $e, getFromHash($r, "errorDesc", ""));
+    exit();
+  }
+  return getFromHash($r, "skip", false);
 }
 ?>

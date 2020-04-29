@@ -25,3 +25,9 @@ CREATE TABLE `vaccinator`.`log` (
   `LOGCOMMENT` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`LOGID`)
 ) ENGINE=InnoDB;
+
+CREATE TABLE `vaccinator`.`search` (
+  `PID` binary(32) NOT NULL COMMENT 'PID 128 bit in hex encoding (always 32 characters)',
+  `WORD` varchar(30) NOT NULL COMMENT 'HEX encoded SearchHash values only',
+  KEY (`WORD`)
+) ENGINE=InnoDB DEFAULT CHARSET=ascii;

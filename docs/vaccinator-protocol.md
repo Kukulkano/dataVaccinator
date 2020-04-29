@@ -1,6 +1,6 @@
-author: Various authors <v.schmid@inspirant.de>
+author:   Volker Schmid <info@vaccinator.net>    
 
-title: Vaccinator Protocol
+title:    DataVaccinator Protocol
 
 Content
 =======
@@ -171,6 +171,16 @@ The system then returns two additional fields:
 <td>INVALID</td>
 </tr>
 <tr class="even">
+<td>20</td>
+<td>Invalid call, invalid call, returned by plugin.</td>
+<td>INVALID</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td>Missing parameter(s), returned by plugin.</td>
+<td>INVALID</td>
+</tr>
+<tr class="even">
 <td>99</td>
 <td>Some internal service error happened. Please contact %PRODUCT% support.</td>
 <td>ERROR</td>
@@ -206,6 +216,10 @@ This call is adding a new person to the system.
   <tr class="odd">
     <td>uid</td>
     <td>User identifier provided by the API user.</td>
+  </tr>
+  <tr class="even">
+    <td>words</td>
+    <td>Array of SearchHashes to add for search function (optional).</td>
   </tr>
 </tbody>
 </table>
@@ -277,6 +291,10 @@ This call is updating an existing entry.
 <tr class="even">
 <td>uid</td>
 <td>User identifier provided by the API user.</td>
+</tr>
+<tr class="even">
+  <td>words</td>
+  <td>Array of SearchHashes to add for search function (optional).</td>
 </tr>
 </tbody>
 </table>
@@ -464,7 +482,9 @@ Check connection
 ----------------
 
 This is just a simple "ping" sort of call to verify if the service is
-available.
+available. It does nothing. It is just answering with status "OK" and giving
+generic information about the platform. This is also not verifying the validity
+of the request using `sid` and `spwd`.
 
 <table>
 <colgroup>
@@ -511,12 +531,78 @@ Result:
 <td>uid</td>
 <td>User identifier provided by the API user during call (only if it was provided).</td>
 </tr>
+<tr class="odd">
+<td>version</td>
+<td>Server version.</td>
+</tr>
+<tr class="even">
+<td>time</td>
+<td>Current date and time on the server (YYYY-MM-DD HH:MM:SS).</td>
+</tr>
+<tr class="odd">
+<td>plugins</td>
+<td>An array of objects mentioning available plugins. Each object contains at least a `name`, `vendor` and `license` field.</td>
+</tr>
 </tbody>
 </table>
 
-This is not a function that does anything. It is just answering with
-status "OK". This is also not verifying the validity using `sid` and
-`spwd`.
+Search
+======
+
+The search function is only available if the DataVaccinator service is running
+the **search** plugin. You can verify this using the "check" function.
+
+<table>
+<colgroup>
+<col width="18%" />
+<col width="81%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>op</td>
+<td>search</td>
+</tr>
+<tr class="even">
+<td>words</td>
+<td>One or more SearchHashes to search for. Multiple SearchHashes have to be divided by space.</td>
+</tr>
+</tbody>
+</table>
+
+Result:
+
+<table>
+<colgroup>
+<col width="18%" />
+<col width="81%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>status</td>
+<td><p>Either OK, INVALID or ERROR. See generic description for details.</p></td>
+</tr>
+<tr class="even">
+<td>uid</td>
+<td>User identifier provided by the API user during call (only if it was provided).</td>
+</tr>
+<tr class="odd">
+<td>pids</td>
+<td>Array of PIDs that matched your search. Empty array if there are no matches.</td>
+</tr>
+</tbody>
+</table>
 
 Implementation of protocol forward
 ==================================

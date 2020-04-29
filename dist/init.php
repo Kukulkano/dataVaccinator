@@ -16,15 +16,22 @@ define('DBDATABASE', "vaccinator");
 define('DBUSER', "vaccinator");
 define('DBPASSWORD', "vaccinator");
 
-// how many pids can get requested in one "get" call:
+// how many pids can get requested in one "get" or "delete" call:
 define('MAX_GET_PID', 500); // default is 500
 
 // how big is data allowed to be:
 define('MAX_DATA_SIZE', 512); // in KB! Default is 512
 
 // global requirements
-require_once(__DIR__ . '/common.php');
-require_once(__DIR__ . '/utils.php');
+$dir = __DIR__ .'/../';
+define('ROOT_DIR', realpath($dir) . '/');
+
+require_once(ROOT_DIR . '/lib/common.php');
+require_once(ROOT_DIR . '/lib/utils.php');
+require_once(ROOT_DIR . '/lib/plugins.php');
+
+// include optional plugins
+// require_once(ROOT_DIR . 'plugins/plugSearch.php');
 
 // Enable debug (if needed)
 // $DebugLevel = RF_LOG_VERB;
