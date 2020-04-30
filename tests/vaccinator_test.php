@@ -332,11 +332,11 @@ function _parseVaccinatorResult($json) {
 function _generateSearchHash($word, $withRandom = false) {
     global $someKey;
     $searchHash = "";
-    $h = "cbb10913b2445cc225b4fb81580a6d02e6ae3d42"; // init, see docs
+    $h = "f1748e9819664b324ae079a9ef22e33e9014ffce302561b9bf71a37916c1d2a3"; // init, see docs
     $letters = str_split($word);
     foreach($letters as $l) {
         $c = strtolower($l);
-        $h = sha1($c . $h . $someKey);
+        $h = hash("sha256", $c . $h . $someKey);
         $searchHash .= substr($h, 0, 2); // concat SearchHash
     }
     if ($withRandom) {
