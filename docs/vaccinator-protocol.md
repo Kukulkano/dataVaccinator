@@ -240,7 +240,7 @@ Result:
 <tbody>
 <tr class="odd">
 <td>status</td>
-<td><p>Either OK, INVALID or ERROR. See generic description for details.</p></td>
+<td>Either OK, INVALID or ERROR. See generic description for details.</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -315,7 +315,7 @@ Result:
 <tbody>
 <tr class="odd">
 <td>status</td>
-<td><p>Either OK, INVALID or ERROR. See generic description for details.</p></td>
+<td>Either OK, INVALID or ERROR. See generic description for details.</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -385,7 +385,7 @@ Result:
 <tbody>
 <tr class="odd">
 <td>status</td>
-<td><p>Either OK, INVALID or ERROR. See generic description for details.</p></td>
+<td>Either OK, INVALID or ERROR. See generic description for details.</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -469,7 +469,7 @@ Result:
 <tbody>
 <tr class="odd">
 <td>status</td>
-<td><p>Either OK, INVALID or ERROR. See generic description for details.</p></td>
+<td>Either OK, INVALID or ERROR. See generic description for details.</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -571,6 +571,10 @@ the **search** plugin. You can verify this using the "check" function.
 <tr class="even">
 <td>words</td>
 <td>One or more SearchHashes to search for. Multiple SearchHashes have to be divided by space.</td>
+</tr>
+<tr class="even">
+<td>uid</td>
+<td>User identifier provided by the API user.</td>
 </tr>
 </tbody>
 </table>

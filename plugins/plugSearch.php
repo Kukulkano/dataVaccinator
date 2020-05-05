@@ -67,7 +67,7 @@ function pl_search_op(array $args) {
       return $r;
   }
   
-  $sql = "SELECT PID FROM search t1\n";
+  $sql = "SELECT t1.PID FROM search t1\n";
   $where = "";
   $filter = array();
   $aWords = explode(" ", $words);
@@ -78,11 +78,12 @@ function pl_search_op(array $args) {
       if ($c > 1) {
           $sql .= "INNER JOIN search t{$c} ON (t1.PID = t{$c}.PID)\n";
       }
-      $where .= "WHERE t{$c}.WORD LIKE ? \n";
+      $where .= "t{$c}.WORD LIKE ? AND ";
       array_push($filter, $w . "%");
       $c = $c + 1;
   }
-  $sql .= $where; // concat with where conditions
+  $where = substr($where, 0, -4); // remove last "AND "
+  $sql .= " WHERE " . $where; // concat with where conditions
   
   $db = new classOpenDB($sql, $filter);
   if ($db->hasError()) {
