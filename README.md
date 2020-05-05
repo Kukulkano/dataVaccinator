@@ -19,7 +19,7 @@ The DataVaccinator service protects your sensitive data and information against 
 
 Get more information, support and contact at <https://www.datavaccinator.com>.
 
-#License information
+# License information
 DataVaccinator is released as free software under the Affero GPL license (AGPL). 
 You can redistribute it and/or modify it under the terms of this license which
 you can read by viewing the included agpl.txt or online at 
