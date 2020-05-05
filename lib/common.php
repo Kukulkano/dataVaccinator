@@ -1,4 +1,21 @@
 <?php
+/*-------------------------------------------------------+
+| DataVaccinator Service Provider System
+| Copyright (C) Volker Schmid
+| https://www.datavaccinator.com/
++--------------------------------------------------------+
+| Filename: common.php
+| Author: Data Vaccinator Development Team
++--------------------------------------------------------+
+| This program is released as free software under the
+| Affero GPL license. You can redistribute it and/or
+| modify it under the terms of this license which you
+| can read by viewing the included agpl.txt or online
+| at www.gnu.org/licenses/agpl.html. Removal of this
+| copyright header is strictly prohibited without
+| written permission from the original author(s).
++--------------------------------------------------------*/
+
 /*
  * General routines used by the vaccinator service.
  * File is generated automatically from regify GmbH sources.
