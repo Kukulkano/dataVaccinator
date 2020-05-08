@@ -75,7 +75,7 @@ It typically looks like in this example:
 This encryption is done automatically by the client API and happens
 transparently for the end users and service provider developers.
 
-**NOTE:**By this encryption, using the app-id as key, the service
+**NOTE:** By this encryption, using the app-id as key, the service
 provider and the vaccinator service both do not have access to the
 content (for example patient data). The checksum as part of the receipt
 allows later verification, if the dataset was encrypted with one or
@@ -172,7 +172,7 @@ The system then returns two additional fields:
 </tr>
 <tr class="even">
 <td>20</td>
-<td>Invalid call, invalid call, returned by plugin.</td>
+<td>Invalid call, returned by plugin.</td>
 <td>INVALID</td>
 </tr>
 <tr class="odd">
@@ -525,7 +525,7 @@ Result:
 <tbody>
 <tr class="odd">
 <td>status</td>
-<td><p>OK</p></td>
+<td>OK</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -595,7 +595,7 @@ Result:
 <tbody>
 <tr class="odd">
 <td>status</td>
-<td><p>Either OK, INVALID or ERROR. See generic description for details.</p></td>
+<td>Either OK, INVALID or ERROR. See generic description for details.</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -635,7 +635,7 @@ two additional values:
 <tbody>
 <tr class="odd">
 <td>sid</td>
-<td><p>The service provider ID. This is provided to the service provider by the vaccinator service staff.</p></td>
+<td>The service provider ID. This is provided to the service provider by the vaccinator service staff.</td>
 </tr>
 <tr class="even">
 <td>spwd</td>
