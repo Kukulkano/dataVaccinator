@@ -8,18 +8,18 @@ Content
 Client Protocol
 ===============
 
-This chapter is describing the protocol for using the vaccinator
+This chapter is describing the protocol for using the DataVaccinator
 pseudonymisation service. This is the internal communication for the
-vaccinator service and not to become implemented by customers developers.
+DataVaccinator service and not to become implemented by customers developers.
 
-The client protocol is implemented in JavaScipt and offers access to all
-pseudonymisation functions and management functions of vaccinator. **It
+The client protocol is currently implemented in JavaScipt and offers access to
+all pseudonymisation functions and management functions of DataVaccinator. **It
 is not the endpoint presented to the developers.** Instead, this is
-communication between the JavaScript class and the vaccinator service
+communication between the JavaScript class and the DataVaccinator service
 itself.
 
-The endpoint interface for developers is described in the next chapter
-"Client API".
+The endpoint interface for developers is described in the documentation for the
+respective endpoint implementation (eg JavaScript class).
 
 Implementation details
 ----------------------
@@ -27,12 +27,12 @@ Implementation details
 The protocol is REST based and works by sending information using POST
 requests. The functionality at the service provider is established by
 some sort of intermediate handling between client and identity
-management. The described client protocol is used between the client
-implementation and the vaccinator service. The service provider always
-forwards all the requests to the vaccinator service and only adds his
+management (proxy). The described client protocol is used between the client
+implementation and the DataVaccinator service. The service provider always
+forwards all the requests to the DataVaccinator service and only adds his
 access information fields to the request (sid and spwd). The results are
 also forwarded back to the calling client then. A few functions like
-`pAdd` also return data that is interesting for the service provider. He
+`add` also return data that is interesting for the service provider. He
 can use this to update his own database.
 
 The JSON encoded structure, containing the function name and all needed
@@ -41,7 +41,7 @@ call consists of some operation code (`op`) and some field containing
 the encrypted data for the vaccinator service (`data`). The optional
 `uid` field is for API users to identify calls to some specific user or
 assigning return values to internal identifiers. It can be unset (empty)
-or contain some value. It is not used for vaccinator identity management.
+or contain some value. It is not used for DataVaccinator identity management.
 
 All calls will return a JSON encoded string, containing the result of
 the operation and additional information.
@@ -52,9 +52,9 @@ additional `code` field contains the error number and the `desc` field
 contains additional information about the error (only if `status` is not
 OK).
 
-The `data` field contains encrypted payload for the identity management.
-It is encrypted due to contained receipt. A data field is always encoded
-like this:
+The `data` field contains encrypted payload for the identity management. It
+is usually named Vaccination Data. It is encrypted due to contained receipt.
+A data field is always encoded like this:
 
     receipt:cs:iv:payload
 
@@ -66,7 +66,7 @@ like this:
 -   The `iv` is the start vector/nonce for encryption in hex encoding.
 
 -   The `payload` is the hex or base64 encoded JSON string with
-    encrypted payload data.
+    encrypted Vaccination Data.
 
 It typically looks like in this example:
 
@@ -76,12 +76,12 @@ This encryption is done automatically by the client API and happens
 transparently for the end users and service provider developers.
 
 **NOTE:** By this encryption, using the app-id as key, the service
-provider and the vaccinator service both do not have access to the
+provider and the DataVaccinator service both do not have access to the
 content (for example patient data). The checksum as part of the receipt
 allows later verification, if the dataset was encrypted with one or
 maybe a newer app-id. This is useful if, for example, the changeAppId()
 function failed during processing (please refer to changeAppId()
-function description in API description).
+function description in JavaScript class documentation).
 
 **NOTE:** The above chosen AES cipher is just the reference
 implementation. You can also use others (like Twofish). The only thing to
@@ -92,10 +92,7 @@ Transport encryption
 --------------------
 
 Of course, all API REST calls are using standard SSL connections
-(https). But in order to make sure that even the service provider does
-not know the end users identities, some data is also encrypted. The
-encrypted information is transported in the `data` field of the POST
-calls.
+(https).
 
 The `data` field is encrypted using the SHA256 from the end users app-id
 as password. We will start implementing AES encryption with CBC mode and
@@ -106,7 +103,7 @@ Error codes
 
 In case of an error, the `status` value is not OK, instead it is either
 INVALID or ERROR. INVALID means that some data you provided triggered
-the error and ERROR is some vaccinator related internal error. If
+the error and ERROR is some DataVaccinator related internal error. If
 INVALID, you need to check your input.
 
 The system then returns two additional fields:
@@ -211,7 +208,7 @@ This call is adding a new person to the system.
   </tr>
   <tr class="even">
     <td>data</td>
-    <td>Encrypted data for the containing all the data to be stored (string blob, use base64 encoding for binary data). Please follow the encoding scheme described in &quot;Implementation Details&quot;.</td>
+    <td>Encrypted payload containing all the Vaccination Data to be stored (string blob, use base64 encoding for binary data). Please follow the encoding scheme described in &quot;Implementation Details&quot;.</td>
   </tr>
   <tr class="odd">
     <td>uid</td>
@@ -248,7 +245,7 @@ Result:
 </tr>
 <tr class="odd">
 <td>pid</td>
-<td>New id for the newly generated person. This may be stored by the service provider and get assigned to the calling client (identified by uid).</td>
+<td>New Vaccination ID for the newly generated person (also VID). This may be stored by the service provider and get assigned to the calling client (identified by uid).</td>
 </tr>
 </tbody>
 </table>
@@ -282,11 +279,11 @@ This call is updating an existing entry.
 </tr>
 <tr class="even">
 <td>data</td>
-<td>Encrypted payload containing all the data to get updated (string blob, use b64 encoding for binary data).</td>
+<td>Encrypted payload containing all the Vaccination Data to get updated (string blob, use b64 encoding for binary data).</td>
 </tr>
 <tr class="odd">
 <td>pid</td>
-<td>Person ID to update.</td>
+<td>Vaccination ID to update.</td>
 </tr>
 <tr class="even">
 <td>uid</td>
@@ -327,14 +324,16 @@ Result:
 **Important implementation note:** Updating payload data is critical to
 the local caches of the JS class. If multiple systems accessing the
 data, the cache of the other systems is outdated after some update. Only
-the system which did the changes is up to date. Therefore, this has to
+the system which did the changes is up to date. 
+
+Therefore, this has to
 be handled special: Please create a unique code (eg time stamp or random
-number) in case you forward some `update` request to the vaccinator
+number) in case you forward some `update` request to the DataVaccinator
 service. This code has to be sent to your client application as soon as
 possible (maybe as part of your protocol). There, please call the
 `wipeCache()` function with this code every time. This will trigger the
 local cache to refresh in case something has changed. Please refer to
-the `wipeCache()` function description in API documentation.
+the `wipeCache()` function description in JavaScript class documentation.
 
 Retrieve person
 ---------------
@@ -359,7 +358,7 @@ This call is retrieving the data of one or more existing entries.
 </tr>
 <tr class="even">
 <td>pid</td>
-<td><p>Person ID to retrieve data from.</p>
+<td><p>Vaccination ID to retrieve data from.</p>
 <p>Multiple PIDs may become requested by concatenating them using blank as divider character. The maximum allowed PIDs is 500 per request.</p></td>
 </tr>
 <tr class="odd">
@@ -393,7 +392,7 @@ Result:
 </tr>
 <tr class="odd">
 <td>data</td>
-<td>This contains the payload(s). Payload always comes as a object array where the PID is the key. It has one entry in case only one PID was requested and multiple entries in case of multiple results. Every given PID creates a return value, even if it was not found or suspicious. Note: The order is not guaranteed to be the same as provided in the request!</td>
+<td>This contains the Vaccination Data payload(s). Payload always comes as a object array where the PID is the key. It has one entry in case only one PID was requested and multiple entries in case of multiple results. Every given PID creates a return value, even if it was not found or suspicious. Note: The order is not guaranteed to be the same as provided in the request!</td>
 </tr>
 </tbody>
 </table>
@@ -443,7 +442,7 @@ This call is deleting an existing entry.
 </tr>
 <tr class="even">
 <td>pid</td>
-<td><p>Person ID to delete from service.</p>
+<td><p>Vaccination ID to delete from service.</p>
 <p>Multiple PIDs may become requested by concatenating them using blank as divider character. The maximum allowed PIDs is 500 per request.</p></td>
 </tr>
 <tr class="odd">
@@ -547,7 +546,7 @@ Result:
 </table>
 
 Search
-======
+------
 
 The search function is only available if the DataVaccinator service is running
 the **search** plugin. You can verify this using the "check" function.
@@ -603,7 +602,7 @@ Result:
 </tr>
 <tr class="odd">
 <td>pids</td>
-<td>Array of PIDs that matched your search. Empty array if there are no matches.</td>
+<td>Array of PIDs (Vaccination IDs) that matched your search. Empty array if there are no matches.</td>
 </tr>
 </tbody>
 </table>
@@ -678,3 +677,6 @@ PIDs the user is not allowed to. Here, please forward the request only
 if the user is allowed to. Please follow the protocol description above
 and, if not allowed, send some status "INVALID" and code 7 (pid not
 found).
+
+Please see examples/ folder in this repository to find a PHP example about
+forwarding DataVaccinator calls (eg from JavaScript class).
