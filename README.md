@@ -1,4 +1,4 @@
-# dataVaccinator
+# DataVaccinator
 This is the DataVaccinator server platform. It has to be installed on some LAMP environment in order to provide the service. Please ensure secure https connections and a secure Apache configuration.
 
 The DataVaccinator server platform offers
