@@ -143,8 +143,7 @@ function pl_search_add(array $args, string $pid = null) {
   $fields = array();
   foreach ($w as $word) {
       $values .= "('{$pid}',?),"; // generate PDO string
-      // ensure nothing added with length > 24 (12 characters)
-      array_push($fields, substr($word, 0, 24));
+      array_push($fields, $word);
   }
   $values = substr($values, 0, -1); // remove last comma
   

@@ -28,6 +28,6 @@ CREATE TABLE `vaccinator`.`log` (
 
 CREATE TABLE `vaccinator`.`search` (
   `PID` binary(32) NOT NULL COMMENT 'PID 128 bit in hex encoding (always 32 characters)',
-  `WORD` varchar(30) NOT NULL COMMENT 'HEX encoded SearchHash values only',
+  `WORD` varchar(255) NOT NULL COMMENT 'HEX encoded SearchHash values only',
   KEY (`WORD`)
 ) ENGINE=InnoDB DEFAULT CHARSET=ascii;
