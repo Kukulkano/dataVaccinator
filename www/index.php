@@ -293,6 +293,11 @@ function _check(array $request) {
 function _validateParams(array &$request, array $needed = array()) {
     global $KeyPublic, $KeyEncoding, $KeyRevoked;
 
+    if (getFromHash($request, "op") === "check") {
+      // check function does not require any validation
+      return true;
+    }
+    
     // add login credentials to be checked always:
     // sid (service provider id)
     // spwd (service provider password)
@@ -382,11 +387,6 @@ function _validateParams(array &$request, array $needed = array()) {
                 return false;
             }
         }
-    }
-
-    if (getFromHash($request, "op") === "check") {
-      // check function does not require a login
-      return true;
     }
     
     // validate login
