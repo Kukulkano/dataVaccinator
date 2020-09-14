@@ -384,6 +384,11 @@ function _validateParams(array &$request, array $needed = array()) {
         }
     }
 
+    if (getFromHash($request, "op") === "check") {
+      // check function does not require a login
+      return true;
+    }
+    
     // validate login
     $sql = "SELECT password FROM provider WHERE providerid=?";
     $res = GetOneSQLValue($sql, array($request["sid"]));
