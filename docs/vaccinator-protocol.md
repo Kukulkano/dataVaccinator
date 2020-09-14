@@ -202,6 +202,10 @@ This call is adding a new dataset to the system (eg PID).
   </tr>
 </thead>
 <tbody>
+  <tr class="even">
+    <td>version</td>
+    <td>2 (current protocol version)</td>
+  </tr>
   <tr class="odd">
     <td>op</td>
     <td>add</td>
@@ -273,6 +277,10 @@ This call is updating an existing entry.
 </tr>
 </thead>
 <tbody>
+<tr class="even">
+  <td>version</td>
+  <td>2 (current protocol version)</td>
+</tr>
 <tr class="odd">
 <td>op</td>
 <td>update</td>
@@ -352,6 +360,10 @@ This call is retrieving the data of one or more existing entries.
 </tr>
 </thead>
 <tbody>
+<tr class="even">
+  <td>version</td>
+  <td>2 (current protocol version)</td>
+</tr>
 <tr class="odd">
 <td>op</td>
 <td>get</td>
@@ -436,6 +448,10 @@ This call is deleting an existing entry.
 </tr>
 </thead>
 <tbody>
+<tr class="even">
+  <td>version</td>
+  <td>2 (current protocol version)</td>
+</tr>
 <tr class="odd">
 <td>op</td>
 <td>delete</td>
@@ -497,6 +513,10 @@ of the request using `sid` and `spwd`.
 </tr>
 </thead>
 <tbody>
+<tr class="even">
+  <td>version</td>
+  <td>2 (current protocol version)</td>
+</tr>
 <tr class="odd">
 <td>op</td>
 <td>check</td>
@@ -563,6 +583,10 @@ the **search** plugin. You can verify this using the "check" function.
 </tr>
 </thead>
 <tbody>
+<tr class="even">
+  <td>version</td>
+  <td>2 (current protocol version)</td>
+</tr>
 <tr class="odd">
 <td>op</td>
 <td>search</td>
