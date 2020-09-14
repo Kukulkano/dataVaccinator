@@ -54,25 +54,25 @@ function DoLog($logType, $provId, $message) {
 }
 
 /**
- * Generates PID suitable for this vaccinator system.
+ * Generates VID suitable for this vaccinator system.
  * Actually, it is a 128 bit random number in hex encoding.
  */
-function GeneratePID() {
+function GenerateVID() {
     // Hint: 16Byte = 128 bit = 32 characters
 
-    // try to get unique PID max 3 times
+    // try to get unique VID max 3 times
     for ($i = 1; $i <= 3; $i++) {
         if (function_exists('random_bytes')) {
             // php 7 or newer
-            $pid = bin2hex(random_bytes(16));
+            $vid = bin2hex(random_bytes(16));
         } else {
             // php pre 7
-            $pid = bin2hex(openssl_random_pseudo_bytes(16));
+            $vid = bin2hex(openssl_random_pseudo_bytes(16));
         }
         $sql = "SELECT PID FROM data WHERE PID=?";
-        $ret = GetOneSQLValue($sql, array($pid));
+        $ret = GetOneSQLValue($sql, array($vid));
         if ($ret === 0) {
-            return $pid;
+            return $vid;
         }
     }
     // Always collisions or SQL errors?

@@ -154,7 +154,7 @@ The system then returns two additional fields:
 </tr>
 <tr class="odd">
 <td>7</td>
-<td>Not found (pid is not found in the system).</td>
+<td>Not found (vid is not found in the system).</td>
 <td>INVALID</td>
 </tr>
 <tr class="even">
@@ -185,10 +185,10 @@ The system then returns two additional fields:
 </tbody>
 </table>
 
-Add new person
---------------
+Add new dataset
+---------------
 
-This call is adding a new person to the system.
+This call is adding a new dataset to the system (eg PID).
 
 <table>
 <colgroup>
@@ -244,20 +244,20 @@ Result:
 <td>User identifier provided by the API user during call (only if it was provided).</td>
 </tr>
 <tr class="odd">
-<td>pid</td>
+<td>vid</td>
 <td>New Vaccination ID for the newly generated person (also VID). This may be stored by the service provider and get assigned to the calling client (identified by uid).</td>
 </tr>
 </tbody>
 </table>
 
 **Important implementation note:** If you forward some positive result
-to the client, please take the returned `pid` and add this to your
+to the client, please take the returned `vid` and add this to your
 service provider database while assigning to the user. By this, you are
 able to send your client software a complete and up to date list of all
-PIDs at any time.
+VIDs at any time.
 
-Update person
--------------
+Update dataset
+--------------
 
 This call is updating an existing entry.
 
@@ -282,7 +282,7 @@ This call is updating an existing entry.
 <td>Encrypted payload containing all the Vaccination Data to get updated (string blob, use b64 encoding for binary data).</td>
 </tr>
 <tr class="odd">
-<td>pid</td>
+<td>vid</td>
 <td>Vaccination ID to update.</td>
 </tr>
 <tr class="even">
@@ -335,8 +335,8 @@ possible (maybe as part of your protocol). There, please call the
 local cache to refresh in case something has changed. Please refer to
 the `wipeCache()` function description in JavaScript class documentation.
 
-Retrieve person
----------------
+Retrieve dataset
+----------------
 
 This call is retrieving the data of one or more existing entries.
 
@@ -357,9 +357,9 @@ This call is retrieving the data of one or more existing entries.
 <td>get</td>
 </tr>
 <tr class="even">
-<td>pid</td>
+<td>vid</td>
 <td><p>Vaccination ID to retrieve data from.</p>
-<p>Multiple PIDs may become requested by concatenating them using blank as divider character. The maximum allowed PIDs is 500 per request.</p></td>
+<p>Multiple VIDs may become requested by concatenating them using blank as divider character. The maximum allowed VIDs is 500 per request.</p></td>
 </tr>
 <tr class="odd">
 <td>uid</td>
@@ -392,7 +392,7 @@ Result:
 </tr>
 <tr class="odd">
 <td>data</td>
-<td>This contains the Vaccination Data payload(s). Payload always comes as a object array where the PID is the key. It has one entry in case only one PID was requested and multiple entries in case of multiple results. Every given PID creates a return value, even if it was not found or suspicious. Note: The order is not guaranteed to be the same as provided in the request!</td>
+<td>This contains the Vaccination Data payload(s). Payload always comes as a object array where the VID is the key. It has one entry in case only one VID was requested and multiple entries in case of multiple results. Every given VID creates a return value, even if it was not found or suspicious. Note: The order is not guaranteed to be the same as provided in the request!</td>
 </tr>
 </tbody>
 </table>
@@ -416,11 +416,11 @@ complete example answer:
       }
     }
 
-The above example showing the result of a request with two PIDs. The
+The above example showing the result of a request with two VIDs. The
 first was a valid request, the second was some unknown entry.
 
-Delete person
--------------
+Delete dataset
+--------------
 
 This call is deleting an existing entry.
 
@@ -441,9 +441,9 @@ This call is deleting an existing entry.
 <td>delete</td>
 </tr>
 <tr class="even">
-<td>pid</td>
+<td>vid</td>
 <td><p>Vaccination ID to delete from service.</p>
-<p>Multiple PIDs may become requested by concatenating them using blank as divider character. The maximum allowed PIDs is 500 per request.</p></td>
+<p>Multiple VIDs may become requested by concatenating them using blank as divider character. The maximum allowed VIDs is 500 per request.</p></td>
 </tr>
 <tr class="odd">
 <td>uid</td>
@@ -601,8 +601,8 @@ Result:
 <td>User identifier provided by the API user during call (only if it was provided).</td>
 </tr>
 <tr class="odd">
-<td>pids</td>
-<td>Array of PIDs (Vaccination IDs) that matched your search. Empty array if there are no matches.</td>
+<td>vids</td>
+<td>Array of VIDs (Vaccination IDs) that matched your search. Empty array if there are no matches.</td>
 </tr>
 </tbody>
 </table>
@@ -661,7 +661,7 @@ Therefore, they need to know about this. The only party able to tell
 them is you. This is done by acting in case of a positive "update" call.
 In case the vaccinator service announces success, please generate a time
 stamp (or random token) and provide it to all affected clients. By
-knowing the pid from the request, you should be able to know the
+knowing the vid from the request, you should be able to know the
 affected persons (logins). You send them this time stamp with their next
 request and they will have to call the wipeCache() function with this as
 parameter. If the API recognises this time stamp/token as already know,
@@ -671,11 +671,11 @@ it's cache and regenerate it on demand later.
 **ALL user requests (get, update and delete)**
 
 Here you might want to verify it the logged in user is allowed to handle
-data about this PID. This would be some important security layer to
+data about this VID. This would be some important security layer to
 prevent manipulations in local client to retrieve or manipulate data of
-PIDs the user is not allowed to. Here, please forward the request only
+VIDs the user is not allowed to. Here, please forward the request only
 if the user is allowed to. Please follow the protocol description above
-and, if not allowed, send some status "INVALID" and code 7 (pid not
+and, if not allowed, send some status "INVALID" and code 7 (vid not
 found).
 
 Please see examples/ folder in this repository to find a PHP example about

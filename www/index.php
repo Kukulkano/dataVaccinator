@@ -34,6 +34,12 @@ if ($request === NULL) {
     exit();
 }
 
+if (!_validateParams($request)) {
+    _generateError($request, EC_MISSING_PARAMETERS, 
+                           "Missing some mandatory parameter(s)");
+    exit();
+}
+
 if (!_manageHook('pre_globalProtocol', $request)) {
 
     $op = getFromHash($request, "op");
@@ -97,17 +103,17 @@ function _add(array $request) {
     if (!_validateParams($request, array("data"))) {
         return;
     }
-    $pid = GeneratePID();
-    if ($pid === false) {
-        // failure pid generation
+    $vid = GenerateVID();
+    if ($vid === false) {
+        // failure vid generation
         _generateError($request, EC_INTERNAL_ERROR, 
-            "Failed pid generation, please contact vaccinator support");
+            "Failed vid generation, please contact vaccinator support");
         return;
     }
 
     $sql = "INSERT INTO data (PID, PAYLOAD, PROVIDERID, CREATIONDATE)
                           VALUES (?, ?, ?, NOW())";
-    $ret = ExecuteSQL($sql, array($pid, 
+    $ret = ExecuteSQL($sql, array($vid, 
                                   $request["data"], 
                                   $request["sid"]));
     if ($ret == false) {
@@ -117,9 +123,14 @@ function _add(array $request) {
         return;
     }
 
-    DoLog(LOG_TYPE_ADD, $request["sid"], $pid);
+    DoLog(LOG_TYPE_ADD, $request["sid"], $vid);
 
-    $j = array("pid" => $pid);
+    if ($request["version"] === 1) {
+      // return both 'vid' and 'pid' (for compatibility to older JS clients)
+      $j = array("pid" => $vid, "vid" => $vid);
+    } else  {
+      $j = array("vid" => $vid);
+    }
     _generateResult($request, $j);
 }
 
@@ -130,23 +141,23 @@ function _add(array $request) {
  * @return void
  */
 function _delete(array $request) {
-    if (!_validateParams($request, array("pid"))) {
+    if (!_validateParams($request, array("vid"))) {
         return;
     }
 
-    $pid = explode(" ", $request["pid"]);
-    if (count($pid) > MAX_GET_PID) {
+    $vid = explode(" ", $request["vid"]);
+    if (count($vid) > MAX_GET_PID) {
         // failure!
         _generateError($request, EC_INVALID_SIZE, 
-            "Maximum ".MAX_GET_PID." pids allowed per request");
+            "Maximum ".MAX_GET_PID." vids allowed per request");
         return;
     }
 
-    $pids = str_repeat("?, ", count($pid) - 1) . "?";
-    array_push($pid, $request["sid"]); // value for last ? is sid
+    $vids = str_repeat("?, ", count($vid) - 1) . "?";
+    array_push($vid, $request["sid"]); // value for last ? is sid
 
-    $sql = "DELETE FROM data WHERE PID IN($pids) AND PROVIDERID=?";
-    $ret = ExecuteSQL($sql, $pid);
+    $sql = "DELETE FROM data WHERE PID IN($vids) AND PROVIDERID=?";
+    $ret = ExecuteSQL($sql, $vid);
     if ($ret == false) {
         // failure!
         _generateError($request, EC_INTERNAL_ERROR, 
@@ -154,7 +165,7 @@ function _delete(array $request) {
         return;
     }
 
-    DoLog(LOG_TYPE_DELETE, $request["sid"], $request["pid"]);
+    DoLog(LOG_TYPE_DELETE, $request["sid"], $request["vid"]);
 
     _generateResult($request, array());
 }
@@ -166,25 +177,25 @@ function _delete(array $request) {
  * @return void
  */
 function _update(array $request) {
-    if (!_validateParams($request, array("data", "pid"))) {
+    if (!_validateParams($request, array("data", "vid"))) {
         return;
     }
 
-    $pid = $request["pid"];
+    $vid = $request["vid"];
 
     // Verify if dataset exists for this service provider
     $sql = "SELECT PROVIDERID FROM data WHERE PID=? AND PROVIDERID=?";
-    $ret = GetOneSQLValue($sql, array($pid, $request["sid"]));
+    $ret = GetOneSQLValue($sql, array($vid, $request["sid"]));
     if ($ret == 0) {
         // failure!
         _generateError($request, EC_NOT_FOUND, 
-            "Entry with this pid not found");
+            "Entry with this vid not found");
         return;
     }
 
     // Update dataset
     $sql = "UPDATE data SET PAYLOAD=? WHERE PID=?";
-    $ret = ExecuteSQL($sql, array($request["data"], $pid));
+    $ret = ExecuteSQL($sql, array($request["data"], $vid));
     if ($ret == false) {
         // failure!
         _generateError($request, EC_INTERNAL_ERROR, 
@@ -192,7 +203,7 @@ function _update(array $request) {
         return;
     }
 
-    DoLog(LOG_TYPE_UPDATE, $request["sid"], $pid);
+    DoLog(LOG_TYPE_UPDATE, $request["sid"], $vid);
 
     _generateResult($request, array());
 }
@@ -204,26 +215,26 @@ function _update(array $request) {
  * @return void
  */
 function _get(array $request) {
-    if (!_validateParams($request, array("pid"))) {
+    if (!_validateParams($request, array("vid"))) {
         return;
     }
 
-    $pid = explode(" ", $request["pid"]);
-    if (count($pid) > MAX_GET_PID) {
+    $vid = explode(" ", $request["vid"]);
+    if (count($vid) > MAX_GET_PID) {
         // failure!
         _generateError($request, EC_INVALID_SIZE, 
-            "Maximum ".MAX_GET_PID." pids allowed per request");
+            "Maximum ".MAX_GET_PID." vids allowed per request");
         return;
     }
 
-    $pids = str_repeat("?, ", count($pid) - 1) . "?";
+    $vids = str_repeat("?, ", count($vid) - 1) . "?";
 
     // Verify if dataset exists for this service provider
     $sql = "SELECT PID, PAYLOAD FROM data 
-              WHERE PID IN($pids) AND PROVIDERID=?";
+              WHERE PID IN($vids) AND PROVIDERID=?";
     $payload = array();
-    $sqlPid = array_merge($pid, array($request["sid"])); // last ? is sid
-    $db = new classOpenDB($sql, $sqlPid);
+    $sqlVid = array_merge($vid, array($request["sid"])); // last ? is sid
+    $db = new classOpenDB($sql, $sqlVid);
     if ($db->hasError()) {
         // failure!
         _generateError($request, EC_INTERNAL_ERROR, 
@@ -235,17 +246,17 @@ function _get(array $request) {
         $j = array("status" => "OK",
                    "data" => $row["PAYLOAD"]);
                    $payload[$row["PID"]] = $j;
-        // remove each found entry from $pid list
-        $pid = array_diff($pid, array($row["PID"]));
+        // remove each found entry from $vid list
+        $vid = array_diff($vid, array($row["PID"]));
     }
-    foreach ($pid as $invalid) {
-        // compose the return values for invalid pids
+    foreach ($vid as $invalid) {
+        // compose the return values for invalid vids
         $j = array("status" => "NOTFOUND",
                    "data" => false);
                    $payload[$invalid] = $j;
     }
 
-    DoLog(LOG_TYPE_GET, $request["sid"], implode(" ", $pid));
+    DoLog(LOG_TYPE_GET, $request["sid"], implode(" ", $vid));
 
     $j = array("data" => $payload);
     _generateResult($request, $j);
@@ -266,22 +277,35 @@ function _check(array $request) {
 /**
  * Test given $request for that all mandatory values are set
  * and confirming to encoding guides. Also checks validity of
- * pkey and pid values (if used).
+ * pkey and vid values (if used).
  * 
  * Provide mandatory value names in array $needed. Only
  * values named here are validated!
+ * 
+ * HINT: If request has a 'pid' but no 'vid' parameter,
+ * we're talking to some outdated JS client. The function
+ * will duplicate the existing 'pid' value as 'vid'.
  * 
  * @param array $request
  * @param array $needed
  * @return boolean valid
  */
-function _validateParams(array $request, array $needed) {
+function _validateParams(array &$request, array $needed = array()) {
     global $KeyPublic, $KeyEncoding, $KeyRevoked;
 
     // add login credentials to be checked always:
     // sid (service provider id)
     // spwd (service provider password)
     array_push($needed, "sid", "spwd");
+    
+    if (!array_key_exists("version", $request)) {
+        // compatibility mode for protocol version 1
+        $request["version"] = 1;
+        if (array_key_exists("pid", $request)) {
+            // for outdated 'pid' parameter (new is 'vid')
+            $request["vid"] = $request["pid"];
+        }
+    }
 
     // Check if all needed values are existing in the request
     foreach($needed as $param) {
@@ -348,13 +372,13 @@ function _validateParams(array $request, array $needed) {
     }
     */
 
-    // validate pid value(s) if needed
-    if (in_array("pid", $needed)) {
-        $pids = explode(" ", $request["pid"]);
-        foreach ($pids as $pid) {
-            if (!validateHEX($pid)) {
+    // validate vid value(s) if needed
+    if (in_array("vid", $needed)) {
+        $vids = explode(" ", $request["vid"]);
+        foreach ($vids as $vid) {
+            if (!validateHEX($vid)) {
                 _generateError($request, EC_INVALID_ENCODING, 
-                  "Invalid pid value (expecting pid to be hex)");
+                  "Invalid vid value (expecting vid to be hex)");
                 return false;
             }
         }

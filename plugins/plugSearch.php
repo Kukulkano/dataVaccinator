@@ -97,7 +97,12 @@ function pl_search_op(array $args) {
       array_push($res, $row["PID"]);
   }
   
-  _generateResult($args[0], array("pids" => $res));
+  if ($args[0]["version"] === 1) {
+    // return both 'vids' and 'pids' (for compatibility to older JS clients)
+    _generateResult($args[0], array("vids" => $res, "pids" => $res));
+  } else {
+    _generateResult($args[0], array("vids" => $res));
+  }
   
   $r["skip"] = true; // for "operation" hook this is like "all okay"
   return $r;
@@ -114,10 +119,10 @@ add_listener('post_add', 'pl_search_add');
  * Adding search hashes to database after protocol was already handled.
  * 
  * @param array $args
- * @param string $pid
+ * @param string $vid
  * @return array
  */
-function pl_search_add(array $args, string $pid = null) {
+function pl_search_add(array $args, string $vid = null) {
   global $clientAnswer; // contains last answer to client (may get enhanced)
   // generic return is "all good"
   $r = array();
@@ -130,11 +135,11 @@ function pl_search_add(array $args, string $pid = null) {
   }
   $w = array_unique($w); // remove duplicates
   
-  if ($pid === null) {
-      $pid = getFromHash($clientAnswer, "pid", "");
+  if ($vid === null) {
+      $vid = getFromHash($clientAnswer, "vid", "");
   }
-  if (!validateHEX($pid) || $pid == "") {
-      // Returned pid seems missing. For this, we simply
+  if (!validateHEX($vid) || $vid == "") {
+      // Returned vid seems missing. For this, we simply
       // ignore such calls.
       return $r;
   }
@@ -142,7 +147,7 @@ function pl_search_add(array $args, string $pid = null) {
   $values = "";
   $fields = array();
   foreach ($w as $word) {
-      $values .= "('{$pid}',?),"; // generate PDO string
+      $values .= "('{$vid}',?),"; // generate PDO string
       array_push($fields, $word);
   }
   $values = substr($values, 0, -1); // remove last comma
@@ -177,20 +182,20 @@ function pl_search_update(array $args) {
   $r["error"] = EC_OK;
   $r["skip"]  = false;
   
-  $pid = getFromHash($args[0], "pid", "");
-  if ($pid == "") {
-      // pid is mandatory. Seems something wrong here. Skip.
+  $vid = getFromHash($args[0], "vid", "");
+  if ($vid == "") {
+      // vid is mandatory. Seems something wrong here. Skip.
       return $r;
   }
   
-  // first, delete all entries for this pid using existing function
+  // first, delete all entries for this vid using existing function
   $r = pl_search_delete($args);
   if (getFromHash($r, "error", EC_OK) !== EC_OK) {
       return $r;
   }
   
-  // now add new keywords using existing function for known PID
-  $r = pl_search_add($args, $pid);
+  // now add new keywords using existing function for known VID
+  $r = pl_search_add($args, $vid);
   
   return $r;
 }
@@ -214,14 +219,14 @@ function pl_search_delete(array $args) {
   $r["error"] = EC_OK;
   $r["skip"]  = false;
   
-  $pid = getFromHash($args[0], "pid", "");
-  $pids = explode(" ", $pid); // array of PIDs
+  $vid = getFromHash($args[0], "vid", "");
+  $vidIds = explode(" ", $vid); // array of VIDs
   // generate PDO string
-  $sPid = str_repeat("?,", count($pids));
-  $sPid = substr($sPid, 0, -1); // remove last comma
+  $sVid = str_repeat("?,", count($vidIds));
+  $sVid = substr($sVid, 0, -1); // remove last comma
   
-  $sql = "DELETE FROM search WHERE PID IN({$sPid})";
-  $ret = ExecuteSQL($sql, $pids);
+  $sql = "DELETE FROM search WHERE PID IN({$sVid})";
+  $ret = ExecuteSQL($sql, $vidIds);
   if (!$ret) {
       $r["error"]     = EC_INTERNAL_ERROR;
       $r["errorDesc"] = "Failed search table delete! Contact DataVaccinator support!";

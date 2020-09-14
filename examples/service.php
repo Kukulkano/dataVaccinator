@@ -35,11 +35,11 @@ if ($j === NULL) {
 }
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// verify validity of the request (eg PID assignemnt to calling user)
+// verify validity of the request (eg VID assignemnt to calling user)
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ($j["op"] == "update" || $j["op"] == "get") {
-    // check PID(s) against your local database
+    // check VID(s) against your local database
 }
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,7 +82,7 @@ echo $result;
 
 if ($j["op"] == "update") {
     // special case, clients need to wipe their cache
-    // for at least the affected PID from $j["pid"] or
+    // for at least the affected VID from $j["vid"] or
     // even the whole cache.
     // Please refer to the vaccinatorJSClient function wipeCache() 
     // for additional documentation and information.

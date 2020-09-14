@@ -37,7 +37,7 @@ $url = $argv[1] . "/index.php";
 $r = array();
 $r["sid"] = $serviceProviderID;
 $r["spwd"] = $serviceProviderPwd;
-$remove = array(); // will have a list of PIDs to remove at the end
+$remove = array(); // will have a list of VIDs to remove at the end
 $supportsSearch = false; // default
 $pass = "- pass\n";
 $someKey = "OAm6_Q%Xk*08";
@@ -165,14 +165,14 @@ while (true) {
         print "Expected status OK for 'add' operation, got [".$j["status"]."] instead.\n";
         break;
     }
-    // got some valid pid?
-    $pid = getFromHash($j, "pid");
-    if (strlen($pid) < 16) {
-        print "Expected some valid pid as result from 'add', got [$pid] instead.\n";
+    // got some valid vid?
+    $vid = getFromHash($j, "vid");
+    if (strlen($vid) < 16) {
+        print "Expected some valid vid as result from 'add', got [$vid] instead.\n";
         break;
     }
-    print "NOTE: New user PID: $pid\n";
-    array_push($remove, $pid); // for later deletion
+    print "NOTE: New user VID: $vid\n";
+    array_push($remove, $vid); // for later deletion
 
     // did I get the uid value back?
     $uid = getFromHash($j, "uid");
@@ -194,7 +194,7 @@ while (true) {
     $r["op"] = "update";
     $r["data"] = "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
     $r["uid"] = 12345;
-    $r["pid"] = $pid; // update generated entry
+    $r["vid"] = $vid; // update generated entry
     if ($supportsSearch) {
       $r["words"] = array(_generateSearchHash("Klaus", true), 
                           _generateSearchHash("Meier", true));
@@ -207,27 +207,27 @@ while (true) {
     }
     print($pass);
 
-    // with unknown PID
+    // with unknown VID
     $r["data"] = "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
     $r["uid"] = 12345;
-    $r["pid"] = "2ff18992cfc290d3d648aea5bdea38b1"; // some unknown PID
+    $r["vid"] = "2ff18992cfc290d3d648aea5bdea38b1"; // some unknown VID
     unset($r["words"]);
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "INVALID") {
-        print "Expected status INVALID for unknown 'update' pid, got [".$j["status"]."] instead.\n";
+        print "Expected status INVALID for unknown 'update' vid, got [".$j["status"]."] instead.\n";
         break;
     }
     print($pass);
 
-    // with invalid PID (no hex)
+    // with invalid VID (no hex)
     $r["data"] = "cbc-aes-256:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
     $r["uid"] = 12345;
-    $r["pid"] = "Im definitely not hex encoded"; // some invalid PID
+    $r["vid"] = "Im definitely not hex encoded"; // some invalid VID
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "INVALID") {
-        print "Expected status INVALID for invalid 'update' pid, got [".$j["status"]."] instead.\n";
+        print "Expected status INVALID for invalid 'update' vid, got [".$j["status"]."] instead.\n";
         break;
     }
     print($pass);
@@ -239,12 +239,12 @@ while (true) {
      */
     print("\nTests retrieving data:\n");
 
-    // retrieve generated pid
+    // retrieve generated vid
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd;
     $r["op"] = "get";
     $r["uid"] = 12345;
-    $r["pid"] = $pid;
+    $r["vid"] = $vid;
     unset($r["data"]);
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
@@ -252,33 +252,33 @@ while (true) {
         print "Expected status OK for 'update' operation, got [".$j["status"]."] instead.\n";
         break;
     }
-    if ($j["data"][$pid]["data"] != "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6") {
+    if ($j["data"][$vid]["data"] != "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6") {
         print "Expected other payload, got [".$j["data"]."] instead.\n";
         break;
     }
     print($pass);
 
-    // retrieve generated pid and inknown pid
-    $r["pid"] = $pid . " 2ff18992cfc290d3d648aea5bdea38b1";
+    // retrieve generated vid and unknown vid
+    $r["vid"] = $vid . " 2ff18992cfc290d3d648aea5bdea38b1";
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "OK") {
         print "Expected status OK for 'update' operation, got [".$j["status"]."] instead.\n";
         break;
     }
-    if ($j["data"][$pid]["status"] != "OK" || 
+    if ($j["data"][$vid]["status"] != "OK" || 
         $j["data"]["2ff18992cfc290d3d648aea5bdea38b1"]["status"] != "NOTFOUND") {
-        print "Expected status OK for valid PID and NOTFOUND for invalid. Got others.\n";
+        print "Expected status OK for valid VID and NOTFOUND for invalid. Got others.\n";
         break; 
     }
     print($pass);
     
-    // retrieve some PID using the search function on modified value "Meier"
+    // retrieve some VID using the search function on modified value "Meier"
     if ($supportsSearch) {
       print("\nTesting 'search' plugin function:\n");
       $r["op"] = "search";
       $r["words"] = _generateSearchHash("Meier", false);
-      unset($r["pid"]);
+      unset($r["vid"]);
       unset($r["data"]);
       
       $j = _parseVaccinatorResult(json_encode($r));
@@ -287,8 +287,8 @@ while (true) {
           print "Expected status OK for 'search' operation, got [".$j["status"]."] instead.\n";
           break;
       }
-      if (getFromHash($j["pids"], 0) != $pid) {
-          print "Expected pid {$pid} as search result but got ".print_r($j["pids"], true)."instead.\n";
+      if (getFromHash($j["vids"], 0) != $vid) {
+          print "Expected vid {$vid} as search result but got ".print_r($j["vids"], true)."instead.\n";
           break;
       }
       print($pass);
@@ -302,13 +302,13 @@ while (true) {
  * Cleanup any entries created during testing
  * *******************************************
  */
-print("\nCleanup pid's created:\n");
+print("\nCleanup vid's created:\n");
 foreach($remove as $toRem) {
-    print("Removing pid [$toRem]... ");
+    print("Removing vid [$toRem]... ");
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd;
     $r["op"] = "delete";
-    $r["pid"] = $toRem . " " . "4532432434324324321";
+    $r["vid"] = $toRem . " " . "4532432434324324321";
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); }
     if ($j["status"] != "OK") {

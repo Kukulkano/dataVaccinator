@@ -117,7 +117,7 @@ For searching, the same applies for the word to search. First, you calculate the
 SearchHash (without randomization) for the text you like to search. For **foo** 
 it is **cb582b**. You simply provide this to the DataVaccinator service and it 
 will do a *like* query to the database of SearchHashes like **cb582b%**, 
-returning all PIDs that contain searchwords starting with this specific sequence.
+returning all VIDs that contain searchwords starting with this specific sequence.
 
 Security Considerations
 =======================
