@@ -84,7 +84,15 @@ function pl_search_op(array $args) {
   }
   $where = substr($where, 0, -4); // remove last "AND "
   $sql .= " WHERE " . $where; // concat with where conditions
+
+  // Filter provider association by putting results in a sub-query 
+  // which filters for provider id (sub-query seems more efficient here).
+  // This avoids later confusion while requesting all vids found.
+  $provId = intval($args[0]["sid"]);
+  array_push($filter, $provId);
+  $sql = "SELECT PID FROM data WHERE PID IN({$sql}) AND PROVIDERID=?";
   
+  // execute the sql query now to get all requested pids
   $db = new classOpenDB($sql, $filter);
   if ($db->hasError()) {
       // failure!
