@@ -1,6 +1,6 @@
 <?php
 /*-------------------------------------------------------+
-| DataVaccinator Service Provider System
+| DataVaccinator Vault Provider System
 | Copyright (C) Volker Schmid
 | https://www.datavaccinator.com/
 +--------------------------------------------------------+

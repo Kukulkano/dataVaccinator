@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# vaccinator installation script
+# vaccinator vault installation script
 #
 if [ $UID -ne 0 ]; then
   echo "Please run the installer as root."

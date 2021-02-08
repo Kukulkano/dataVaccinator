@@ -1,6 +1,6 @@
 author:   Volker Schmid <info@vaccinator.net>    
 
-title:    DataVaccinator Protocol
+title:    DataVaccinator Vault Protocol
 
 Content
 =======
@@ -8,14 +8,14 @@ Content
 Client Protocol
 ===============
 
-This chapter is describing the protocol for using the DataVaccinator
+This chapter is describing the protocol for using the DataVaccinator Vault
 pseudonymisation service. This is the internal communication for the
-DataVaccinator service and not to become implemented by customers developers.
+DataVaccinator Vault service and not to become implemented by customers developers.
 
 The client protocol is currently implemented in JavaScipt and offers access to
-all pseudonymisation functions and management functions of DataVaccinator. **It
-is not the endpoint presented to the developers.** Instead, this is
-communication between the JavaScript class and the DataVaccinator service
+all pseudonymisation functions and management functions of DataVaccinator Vault. 
+**It is not the endpoint presented to the developers.** Instead, this is
+communication between the JavaScript class and the DataVaccinator Vault
 itself.
 
 The endpoint interface for developers is described in the documentation for the
@@ -28,8 +28,8 @@ The protocol is REST based and works by sending information using POST
 requests. The functionality at the service provider is established by
 some sort of intermediate handling between client and identity
 management (proxy). The described client protocol is used between the client
-implementation and the DataVaccinator service. The service provider always
-forwards all the requests to the DataVaccinator service and only adds his
+implementation and the DataVaccinator Vault. The service provider always
+forwards all the requests to the DataVaccinator Vault and only adds his
 access information fields to the request (sid and spwd). The results are
 also forwarded back to the calling client then. A few functions like
 `add` also return data that is interesting for the service provider. He
@@ -38,7 +38,7 @@ can use this to update his own database.
 The JSON encoded structure, containing the function name and all needed
 parameters, is typically sent in a POST field named `json`. A typical
 call consists of some operation code (`op`) and some field containing
-the encrypted data for the vaccinator service (`data`). The optional
+the encrypted data for the DataVaccinator Vault (`data`). The optional
 `uid` field is for API users to identify calls to some specific user or
 assigning return values to internal identifiers. It can be unset (empty)
 or contain some value. It is not used for DataVaccinator identity management.
@@ -58,7 +58,7 @@ A data field is always encoded like this:
 
     receipt:cs:iv:payload
 
--   The `receipt` defines the used algorithm for encryption.
+-   The `receipt` defines the algorithm used for encryption.
 
 -   The `cs` value is the checksum of the used app-id key (last byte in
     hex, see app-id description).
@@ -76,7 +76,7 @@ This encryption is done automatically by the client API and happens
 transparently for the end users and service provider developers.
 
 **NOTE:** By this encryption, using the app-id as key, the service
-provider and the DataVaccinator service both do not have access to the
+provider and the DataVaccinator Vault both do not have access to the
 content (for example patient data). The checksum as part of the receipt
 allows later verification, if the dataset was encrypted with one or
 maybe a newer app-id. This is useful if, for example, the changeAppId()
@@ -337,7 +337,7 @@ the system which did the changes is up to date.
 Therefore, this has to
 be handled special: Please create a unique code (eg time stamp or random
 number) in case you forward some `update` request to the DataVaccinator
-service. This code has to be sent to your client application as soon as
+Vault. This code has to be sent to your client application as soon as
 possible (maybe as part of your protocol). There, please call the
 `wipeCache()` function with this code every time. This will trigger the
 local cache to refresh in case something has changed. Please refer to
@@ -458,7 +458,7 @@ This call is deleting an existing entry.
 </tr>
 <tr class="even">
 <td>vid</td>
-<td><p>Vaccination ID to delete from service.</p>
+<td><p>Vaccination ID to delete from DataVaccinator Vault.</p>
 <p>Multiple VIDs may become requested by concatenating them using blank as divider character. The maximum allowed VIDs is 500 per request.</p></td>
 </tr>
 <tr class="odd">
@@ -568,7 +568,7 @@ Result:
 Search
 ------
 
-The search function is only available if the DataVaccinator service is running
+The search function is only available if the DataVaccinator Vault is running
 the **search** plugin. You can verify this using the "check" function.
 
 <table>
@@ -640,8 +640,8 @@ handle and forward REST protocol requests.
 Forward requests by adding service provider credentials
 -------------------------------------------------------
 
-In general, all requests have to become forwarded to the vaccinator
-service URL. The JSON encoded in `json` data value must get enhanced by
+In general, all requests have to become forwarded to the DataVaccinator
+Vault URL. The JSON encoded in `json` data value must get enhanced by
 two additional values:
 
 <table>
@@ -668,8 +668,8 @@ two additional values:
 </table>
 
 Upon the JSON request was updated by sid and spwd, the request is
-forwarded to the vaccinator service URL (provided to you by the vaccinator
-service staff). The returned result is sent as an answer to the calling
+forwarded to the DataVaccinator Vault URL (provided to you by the DataVaccinator
+staff). The returned result is sent as an answer to the calling
 end user client (eg web browser API).
 
 Observe and enrich function calls
@@ -683,7 +683,7 @@ provide additional functionality required.
 The update call will out date all other participants local caches.
 Therefore, they need to know about this. The only party able to tell
 them is you. This is done by acting in case of a positive "update" call.
-In case the vaccinator service announces success, please generate a time
+In case the DataVaccinator Vault announces success, please generate a time
 stamp (or random token) and provide it to all affected clients. By
 knowing the vid from the request, you should be able to know the
 affected persons (logins). You send them this time stamp with their next

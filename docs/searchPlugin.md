@@ -8,7 +8,7 @@ Foreword
 The data vaccinator enables developers to easily implement pseudonymisation into
 their own projects. The drawback of many pseudonymisation solutions is the
 missing search functionality. It is not possible to search for pseudonymized
-data inside DataVaccinator service because the payloads are encrypted and
+data inside DataVaccinator Vault because the payloads are encrypted and
 encrypted data can not get searched for.
 By this, the use-cases are limited to projects where this is not mandatory.
 
@@ -37,7 +37,7 @@ to create a special kind of hashcode for words that have to be searchable
 (searchwords, on other publications also called *token* or *search token*).
 
 The SearchHash for all words to be searchable has to become submitted together 
-with an *add* or *update* call to the DataVaccinator Service. It will then
+with an *add* or *update* call to the DataVaccinator Vault. It will then
 provide search functionality that allows you searching for such SearchHashes,
 even partially if you always start from the left. The search function is added
 to the server by a plugin.

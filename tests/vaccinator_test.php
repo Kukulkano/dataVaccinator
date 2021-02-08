@@ -1,6 +1,6 @@
 <?php
 /*-------------------------------------------------------+
-| DataVaccinator Service Provider System
+| DataVaccinator Vault Provider System
 | Copyright (C) Volker Schmid
 | https://www.datavaccinator.com/
 +--------------------------------------------------------+
@@ -19,14 +19,14 @@
 /**
  * Comandline test-tool for vaccinator service protocol.
  * 
- * Call with vaccinator service URL as parameter.
+ * Call with DataVaccinator Vault URL as parameter.
  */
 
 $serviceProviderID  = 1;
 $serviceProviderPwd = "vaccinator";
 
 if (count($argv) < 2) {
-    print("Please provide URL for vaccinator service (like http://vaccinator.com)\n");
+    print("Please provide URL for DataVaccinator Vault (like https://service.vaccinator.com)\n");
     exit();
 }
 

@@ -1,11 +1,11 @@
 <?php
 /*-------------------------------------------------------+
-| DataVaccinator Service Provider System
+| DataVaccinator Vault Provider System
 | Copyright (C) Volker Schmid
 | https://www.datavaccinator.com/
 +--------------------------------------------------------+
 | Filename: plugins.php
-| Author: Data Vaccinator Development Team
+| Author: DataVaccinator Development Team
 +--------------------------------------------------------+
 | This program is released as free software under the
 | Affero GPL license. You can redistribute it and/or

@@ -2,7 +2,7 @@
 /**
  * Emulating some vaccinator service provider.
  * 
- * Mainly forwarding all vaccinator protocol requests to the vaccinator service.
+ * Mainly forwarding all vaccinator protocol requests to the DataVaccinator Vault.
  * Adds uid and upwd parameters for vaccinator protocol to verify as provider.
  */
 
@@ -57,18 +57,18 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 
-// execute post to vaccinator service
+// execute post to DataVaccinator Vault
 $result = curl_exec($ch);
 if ($result === false) {
     // call failed, try fallback URL
-    error_log("Main vaccinator URL failed!");
+    error_log("Main DataVaccinator URL failed!");
     curl_setopt($ch, CURLOPT_URL, $vaccinatorUrl2);
     $result = curl_exec($ch);
     if ($result === false) {
         // fallback also failed
         $ret = array("status" => "ERROR",
                      "code" => EC_INTERNAL_ERROR,
-                     "desc" => "Vaccinator service offline/error");
+                     "desc" => "DataVaccinator Vault offline/error");
         echo json_encode($ret)."\n";
         exit();
     }
