@@ -8,8 +8,8 @@
 
 $sid        = 1; // service provider ID
 $spwd       = "vaccinator"; // service provider password
-$vaccinatorUrl   = "http://vaccinator.vsdevel.de.regify.com"; // service provider main URL
-$vaccinatorUrl2  = "http://vaccinator.vsdevel.de.regify.com"; // service provider fallback URL
+$vaccinatorUrl   = "http://127.0.0.1:8080"; // service provider main URL
+$vaccinatorUrl2  = "http://127.0.0.1:8080"; // service provider fallback URL
 
 define('EC_MISSING_PARAMETERS', 1);  // Missing parameters.
 define('EC_INVALID_ENCODING',   6);  // expected json, hex or b64, but it is not

@@ -51,6 +51,7 @@ while (true) {
     print("\nGet version and check availability:\n");
     
     $r["op"] = "check";
+    $r["version"] = 2;
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "OK") {
@@ -130,8 +131,8 @@ while (true) {
     }
     print($pass);
 
-    // Invalid hex encoding for IV in data
-    print($pass);
+    // Invalid hex encoding for IV in data (removed for golang version)
+    /*
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd;
     $r["data"] = "cbc-aes-256:7f:75os3i1!#1tkuunp1fjoauw:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6";
@@ -142,6 +143,7 @@ while (true) {
         break;
     }
     print($pass);
+    */
 
     /**
      * *******************************************
@@ -249,7 +251,7 @@ while (true) {
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "OK") {
-        print "Expected status OK for 'update' operation, got [".$j["status"]."] instead.\n";
+        print "Expected status OK for 'get' operation, got [".$j["status"]."] instead.\n";
         break;
     }
     if ($j["data"][$vid]["data"] != "chacha20:7f:29a1c8b68d8a:btewwyzox3i3fe4cg6a1qzi8pqoqa55orzf4bcxtjfcf5chep998sj6") {
@@ -263,7 +265,7 @@ while (true) {
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
     if ($j["status"] != "OK") {
-        print "Expected status OK for 'update' operation, got [".$j["status"]."] instead.\n";
+        print "Expected status OK for 'get' operation, got [".$j["status"]."] instead.\n";
         break;
     }
     if ($j["data"][$vid]["status"] != "OK" || 
@@ -276,11 +278,27 @@ while (true) {
     // retrieve some VID using the search function on modified value "Meier"
     if ($supportsSearch) {
       print("\nTesting 'search' plugin function:\n");
+      // search one word
       $r["op"] = "search";
-      $r["words"] = _generateSearchHash("Meier", false);
+      $r["words"] = _generateSearchHash("Meier", false); // modified by update before!
       unset($r["vid"]);
       unset($r["data"]);
       
+      $j = _parseVaccinatorResult(json_encode($r));
+      if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
+      if ($j["status"] != "OK") {
+          print "Expected status OK for 'search' operation, got [".$j["status"]."] instead.\n";
+          break;
+      }
+      if (getFromHash($j["vids"], 0) != $vid) {
+          print "Expected vid {$vid} as search result but got ".print_r($j["vids"], true)."instead.\n";
+          break;
+      }
+      print($pass);
+
+      // search two words
+      $r["words"] = _generateSearchHash("Meier", false); // modified by update before!
+      $r["words"] .= " " . _generateSearchHash("Klaus", false);
       $j = _parseVaccinatorResult(json_encode($r));
       if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); break; }
       if ($j["status"] != "OK") {
@@ -308,7 +326,8 @@ foreach($remove as $toRem) {
     $r["sid"] = $serviceProviderID;
     $r["spwd"] = $serviceProviderPwd;
     $r["op"] = "delete";
-    $r["vid"] = $toRem . " " . "4532432434324324321";
+    $r["version"] = 2;
+    $r["vid"] = $toRem . " " . "e6ec07c19fbadbd062028cedbe4ab7e5";
     $j = _parseVaccinatorResult(json_encode($r));
     if ($j === NULL || $j === false) { print("unexpected result (no json)\n"); }
     if ($j["status"] != "OK") {
@@ -327,7 +346,7 @@ print "\nDone\n";
  */
 
 /**
- * Call DataVaccinator and decode result.
+ * Call DataVaccinator Vault and decode result.
  * 
  * @param string $json
  * @return array
