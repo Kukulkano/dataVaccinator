@@ -1,5 +1,13 @@
+---------------------------------------------------------
+
+# :warning: **NOTE:**
+
+This project is stopped in June 2021 and replaced by the newly developed DataVaccinator Vault at https://github.com/Kukulkano/dv-vault.
+
+---------------------------------------------------------
+
 # DataVaccinator
-This is the DataVaccinator Vault platform. It has to be installed on some LAMP environment in order to provide the service. Please ensure secure https connections and a secure Apache configuration.
+This is the legacy DataVaccinator Vault platform. It has to be installed on some LAMP environment in order to provide the service. Please ensure secure https connections and a secure Apache configuration.
 
 The DataVaccinator Vault platform offers
 
